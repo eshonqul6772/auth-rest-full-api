@@ -1,41 +1,38 @@
 const express = require("express");
 const cors = require("cors");
+const routes = require('./routes')
+
 
 const app = express();
 
 const corsOptions = {
-  origin: "http://localhost:8081"
+  origin: "http://localhost:9998"
 };
 
-app.use(cors(corsOptions));
-
-
-// parse requests of content-type - application/json
-app.use(express.json());
-
-// parse requests of content-type - application/x-www-form-urlencoded
+// middlewares
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(cors(corsOptions));
+app.use(cors({options: '*'}))
+app.options("*",cors());
+app.use(routes);
 
-// database
-const db = require("./src/models");
+const db = require("./models");
+const {options} = require("pg/lib/defaults");
 const Role = db.role;
 
-db.sequelize.sync({force: true}).then(() => {
-  console.log('Drop and Resync Db');
+db.sequelize.sync({alter: true}).then(() => {
+  console.log('Drop and Rsync Db');
   initial();
 });
 
-
-// simple route
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to bezkoder application." });
 });
 
-// routes
-require('./src/routes/auth.routes')(app);
-require('./src/routes/user.routes')(app);
+require('./routes/admin/auth')(app);
+require('./routes/admin/user')(app);
 
-// set port, listen for requests
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, () => {
@@ -46,16 +43,16 @@ app.listen(PORT, () => {
 function initial() {
   Role.create({
     id: 1,
-    name: "user"
+    name: "USER"
   });
 
   Role.create({
     id: 2,
-    name: "moderator"
+    name: "MODERATOR"
   });
 
   Role.create({
     id: 3,
-    name: "admin"
+    name: "ADMIN"
   });
 }

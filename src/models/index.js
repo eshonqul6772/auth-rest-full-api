@@ -1,6 +1,5 @@
 const config = require("../config/db.config.js");
-
-const Sequelize = require("sequelize");
+const {Sequelize} = require("sequelize");
 const sequelize = new Sequelize(
   config.DB,
   config.USER,
@@ -8,6 +7,7 @@ const sequelize = new Sequelize(
   {
     host: config.HOST,
     dialect: config.dialect,
+    logging: true,
     pool: {
       max: config.pool.max,
       min: config.pool.min,
@@ -32,6 +32,6 @@ db.user.belongsToMany(db.role, {
   through: "user_roles"
 });
 
-db.ROLES = ["user", "admin", "moderator"];
+db.ROLES = ["USER", "ADMIN", "MODERATOR"];
 
 module.exports = db;
